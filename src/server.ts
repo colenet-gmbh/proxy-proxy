@@ -6,6 +6,13 @@ let server = http.createServer();
 class State {
     state = 0;
 
+    parseHeaders(headers: any) {
+        if (headers['proxy-authenticate'] !== '') {
+           return true;
+        }
+        return false;
+    }
+
 }
 
 server.on('connection', (socket) => {
@@ -14,13 +21,12 @@ server.on('connection', (socket) => {
    s.applicationState = new State();
 });
 
-
 server.on('connect', (req, socket, head) => {
     console.info('CONNECT event');
-    console.info( 'head %j', head);
+    console.info( 'headers %j', req.headers);
     console.info('state %j', socket.applicationState);
 
-    if ( socket.applicationState.state === 0 ) {
+    if ( socket.applicationState.parseHeaders(req.headers)) {
         socket.write('HTTP/' + req.httpVersion
          + ' 407 ProxyAuthentication Required\r\n'
          + 'Proxy-Authenticate: Negotiate\r\nProxy-Authenticate: NTLM\r\n'
