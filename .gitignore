@@ -1,0 +1,4 @@
+.tscache
+.idea
+bin
+node_modules
