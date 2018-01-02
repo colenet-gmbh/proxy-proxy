@@ -9,9 +9,11 @@
     "start-dev": "concurrently --kill-others \"npm run watch\" \"nodemon bin/server.js\""
   },
   "dependencies": {
+    "connect": "^3.6.5",
     "express": "^4.16.2"
   },
   "devDependencies": {
+    "@types/connect": "^3.4.31",
     "@types/express": "^4.11.0",
     "@types/node": "^8.5.2",
     "concurrently": "^3.5.1",

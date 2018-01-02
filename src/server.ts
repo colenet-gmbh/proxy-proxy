@@ -1,14 +1,36 @@
-import * as express from 'express';
+import * as http from 'http';
 
-let app : express.Application = express();
-let router: express.Router;
-router = express.Router();
+let server = http.createServer();
 
-router.get( '/', (req, resp) => {
 
-    resp.sendStatus(200);
+class State {
+    state = 0;
+
+}
+
+server.on('connection', (socket) => {
+   console.info('new socket');
+   let s: any = socket;
+   s.applicationState = new State();
 });
 
-app.use(router);
-app.listen(4000);
-console.info('Started server on 4000' );
+
+server.on('connect', (req, socket, head) => {
+    console.info('CONNECT event');
+    console.info( 'head %j', head);
+    console.info('state %j', socket.applicationState);
+
+    if ( socket.applicationState.state === 0 ) {
+        socket.write('HTTP/' + req.httpVersion
+         + ' 407 ProxyAuthentication Required\r\n'
+         + 'Proxy-Authenticate: Negotiate\r\nProxy-Authenticate: NTLM\r\n'
+         + 'Connection: close\r\n'
+         + 'proxy-Connection: close\r\n'
+         + '\r\n'
+        );
+    }
+});
+
+server.listen(4000);
+
+console.info('Server started on 4000');
