@@ -18,6 +18,7 @@ describe( 'Proxy', () => {
        const socket = new net.Socket();
        await socket.connect(port);
        const msg = new HttpMessage();
+
        socket.on('data', (buffer) => {
            const parser = new HttpMessageParser();
            const res = parser.parseResponse(buffer.toString());
@@ -25,6 +26,7 @@ describe( 'Proxy', () => {
            expect(socket.destroyed).toBeTruthy('Connection should be teared down by proxy');
            done();
        });
+
        msg.setHttpMethod('CONNECT');
        msg.setHttpMethodParam('http://example.com');
        msg.addHeader('proxy-Connection', 'keep-alive');
@@ -38,6 +40,7 @@ describe( 'Proxy', () => {
         const socket = new net.Socket();
         await socket.connect(port);
         const msg = new HttpMessage();
+
         socket.on('data', (buffer) => {
             const parser = new HttpMessageParser();
             const res = parser.parseResponse(buffer.toString());
@@ -46,6 +49,7 @@ describe( 'Proxy', () => {
             expect(res.headers['proxy-authenticate']).toMatch(/NTLM\s+.*/);
             done();
         });
+
         msg.setHttpMethod('CONNECT');
         msg.setHttpMethodParam('http://example.com');
         msg.addHeader('proxy-Connection', 'keep-alive');
@@ -54,4 +58,42 @@ describe( 'Proxy', () => {
         console.info(buffer);
         socket.write(buffer);
     });
+
+    it('should establish channel if 2nd round succeeds', async (done) => {
+        const socket = new net.Socket();
+        await socket.connect(port);
+        const msg = new HttpMessage();
+
+        let round = 1;
+
+        socket.on('data', (buffer) => {
+            const parser = new HttpMessageParser();
+            const res = parser.parseResponse(buffer.toString());
+            if (round == 1) {
+                expect(res.statusCode).toEqual(407);
+                expect(res.headers['proxy-authenticate']).toBeDefined();
+                expect(res.headers['proxy-authenticate']).toMatch(/NTLM\s+.*/);
+                const msg = new HttpMessage();
+
+                msg.setHttpMethod('CONNECT');
+                msg.setHttpMethodParam('http://example.com');
+                msg.addHeader('proxy-Connection', 'keep-alive');
+                msg.addHeader('Proxy-Authenticate', 'NTLM 2ndroundhash');
+                const buffer = msg.createMessage();
+                socket.write(buffer);
+                round = 2;
+            }
+            else {
+                expect(res.statusCode).toEqual(200);
+                done();
+            }
+        });
+
+        msg.setHttpMethod('CONNECT');
+        msg.setHttpMethodParam('http://example.com');
+        msg.addHeader('proxy-Connection', 'keep-alive');
+        msg.addHeader('Proxy-Authenticate', 'NTLM 1stroundhash');
+        const buffer = msg.createMessage();
+        socket.write(buffer);
+    }, 500);
 });
