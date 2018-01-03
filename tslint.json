@@ -30,7 +30,7 @@
       "check-else",
       "check-whitespace"
     ],
-    "quotemark": [true, "single"],
+    "quotemark": [false, "single"],
     "semicolon": true,
     "triple-equals": [true, "allow-null-check"],
     "typedef": [true,
