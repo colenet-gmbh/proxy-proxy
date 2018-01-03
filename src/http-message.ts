@@ -41,10 +41,12 @@ export class HttpMessage {
         }
         else {
             response += "HTTP/" + this.httpVersion + " ";
-            response += this.statusCode.toString() + " " + this.statusText + this.crlf();
+            response += this.statusCode.toString() + " " + this.statusText;
+            response += this.crlf();
         }
         for (const header of this.headers) {
-            response += header["key"] + ": " + header["value"] + this.crlf();
+            response += header["key"] + ": " + header["value"];
+            response += this.crlf();
         }
         response += this.crlf();
         return response;

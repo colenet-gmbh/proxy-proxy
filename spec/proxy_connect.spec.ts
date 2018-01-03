@@ -23,9 +23,12 @@ describe( 'Proxy', () => {
            const parser = new HttpMessageParser();
            const res = parser.parseResponse(buffer.toString());
            expect(res.statusCode).toEqual(407);
+       });
+
+       socket.on('close', (had_error => {
            expect(socket.destroyed).toBeTruthy('Connection should be teared down by proxy');
            done();
-       });
+       }));
 
        msg.setHttpMethod('CONNECT');
        msg.setHttpMethodParam('http://example.com');
@@ -69,10 +72,11 @@ describe( 'Proxy', () => {
         socket.on('data', (buffer) => {
             const parser = new HttpMessageParser();
             const res = parser.parseResponse(buffer.toString());
-            if (round == 1) {
+            if (round === 1) {
                 expect(res.statusCode).toEqual(407);
                 expect(res.headers['proxy-authenticate']).toBeDefined();
                 expect(res.headers['proxy-authenticate']).toMatch(/NTLM\s+.*/);
+                expect(socket.destroyed).toBeFalsy();
                 const msg = new HttpMessage();
 
                 msg.setHttpMethod('CONNECT');
@@ -80,8 +84,9 @@ describe( 'Proxy', () => {
                 msg.addHeader('proxy-Connection', 'keep-alive');
                 msg.addHeader('Proxy-Authenticate', 'NTLM 2ndroundhash');
                 const buffer = msg.createMessage();
-                socket.write(buffer);
-                round = 2;
+                socket.write(buffer, () => {
+                    round = 2;
+                });
             }
             else {
                 expect(res.statusCode).toEqual(200);
@@ -89,11 +94,19 @@ describe( 'Proxy', () => {
             }
         });
 
+        socket.on('error', (err: Error) => {
+           done.fail(err);
+        });
+
+        socket.on('end', () => {
+           done.fail('socket closed');
+        });
         msg.setHttpMethod('CONNECT');
         msg.setHttpMethodParam('http://example.com');
         msg.addHeader('proxy-Connection', 'keep-alive');
         msg.addHeader('Proxy-Authenticate', 'NTLM 1stroundhash');
+        msg.addHeader('Content-Length', '0');
         const buffer = msg.createMessage();
         socket.write(buffer);
-    }, 500);
+    }, 5000);
 });

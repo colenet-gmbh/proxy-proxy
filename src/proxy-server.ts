@@ -39,6 +39,14 @@ class State {
             return res;
         }
 
+        function secondRoundResponse() {
+            let res = new HttpMessage();
+            res.setHttpVersion(req.httpVersion);
+            res.setStatusCode(200);
+            res.setStatusText('Connection established');
+            return res;
+        }
+
         if (headers['proxy-authenticate'] === undefined) {
             this.internalState = AuthenticationState.noAuthentication;
             console.info('no proxy-authenticate');
@@ -52,12 +60,16 @@ class State {
                     this.internalState = AuthenticationState.firstRound;
                     return firstRoundResponse().createMessage();
                 case AuthenticationState.firstRound:
-                    this.internalState = AuthenticationState.secondRound
-                    break;
+                    this.internalState = AuthenticationState.secondRound;
+                    return secondRoundResponse().createMessage();
                 case AuthenticationState.secondRound:
                     break;
             }
         }
+    }
+
+    shouldClose() {
+        return this.internalState === AuthenticationState.noAuthentication;
     }
 }
 
@@ -74,9 +86,15 @@ export class ProxyServer {
         this.server = http.createServer();
 
         this.server.on('connection', (socket) => {
-            console.info('new socket');
             let s: any = socket;
-            s.applicationState = new State();
+            if (s.applicationState === undefined) {
+                console.info();
+                console.info('new socket');
+                s.applicationState = new State();
+            }
+            else {
+                console.info('rewirting socket');
+            }
         });
 
         this.server.on('connect', (req: http.IncomingMessage, socket: Socket, head: Buffer) => {
@@ -85,16 +103,35 @@ export class ProxyServer {
             console.info('state %j', socket.applicationState);
 
             socket.write(socket.applicationState.nextActionOnConnection(req));
+            console.info('New socket state: %j', socket.applicationState);
+            if (socket.applicationState.shouldClose()) {
+                console.info('tear down socket');
+                socket.destroy();
+            }
+            else {
+                // rewire socket for event emitter
+                this.server.emit('connection', socket);
+            }
         });
 
         this.server.on('request', (req: http.IncomingMessage, res: http.ServerResponse) => {
-            console.info('Request %j', req);
+            console.info('REQUEST %j', req);
             const socket: Socket = <Socket>req.socket;
             res.write(socket.applicationState.nextActionOnConnection(req));
         });
+
+        this.server.on('clientError', (exception: Error, socket: Socket) => {
+            console.error('ProxyServer: client error: %j', exception.message);
+            socket.destroy(exception);
+        });
+
+        this.server.on('upgrade', (request: http.IncomingMessage, socket: Socket, head: Buffer) => {
+            console.info('Wants to upgrade -> teardown');
+            socket.destroy( "No upgrades today");
+        })
         this.server.listen(port);
 
-        console.info(`Server started on {port}`);
+        console.info(`Server started on ${port}`);
     }
 
     public stop() {
