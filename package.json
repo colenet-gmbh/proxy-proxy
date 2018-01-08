@@ -1,6 +1,6 @@
 {
   "name": "proxy-proxy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Proxy \"mock\" to test NTLM authorization ",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
