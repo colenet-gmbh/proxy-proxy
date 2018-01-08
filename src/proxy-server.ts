@@ -23,8 +23,8 @@ class State {
             res.setStatusText('ProxyAuthentication required');
             res.addHeader('Proxy-Authenticate', 'Negotiate');
             res.addHeader('Proxy-Authenticate', 'NTLM');
-            res.addHeader( 'Connection', 'close');
-            res.addHeader( 'Proxy-Connection', 'close');
+            res.addHeader('Connection', 'close');
+            res.addHeader('Proxy-Connection', 'close');
             return res;
         }
 
@@ -128,7 +128,7 @@ export class ProxyServer {
         this.server.on('upgrade', (request: http.IncomingMessage, socket: Socket, head: Buffer) => {
             console.info('Wants to upgrade -> teardown');
             socket.destroy( "No upgrades today");
-        })
+        });
         this.server.listen(port);
 
         console.info(`Server started on ${port}`);

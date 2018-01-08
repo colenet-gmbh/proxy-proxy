@@ -8,9 +8,9 @@ export class HttpMessageParser {
         response['protocolVersion'] = parsedStatusLine['protocol'];
         response['statusCode'] = +parsedStatusLine['statusCode'];
         response['statusMessage'] = parsedStatusLine['statusMessage'];
-        const headerLines = []
+        const headerLines = [];
         while (lines.length > 0) {
-            const line = lines.shift()
+            const line = lines.shift();
             if (line === "") {
                 break;
             }
@@ -25,7 +25,7 @@ export class HttpMessageParser {
     private parseHeaders(headerLines: Array<string>) : any {
         const headers = {};
         for (const line of headerLines) {
-            const parts = line.split(':')
+            const parts = line.split(':');
             const key = parts.shift().toLowerCase();
             const val = parts.join(':').trim();
             if (headers[key] === undefined ) {

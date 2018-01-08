@@ -25,10 +25,10 @@ describe( 'Proxy', () => {
            expect(res.statusCode).toEqual(407);
        });
 
-       socket.on('close', (had_error => {
+       socket.on('close', () => {
            expect(socket.destroyed).toBeTruthy('Connection should be teared down by proxy');
            done();
-       }));
+       });
 
        msg.setHttpMethod('CONNECT');
        msg.setHttpMethodParam('http://example.com');

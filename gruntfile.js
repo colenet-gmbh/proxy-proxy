@@ -6,7 +6,8 @@ module.exports = function(grunt) {
       app: {
         files: [{
           src: ["src/\*\*/\*.ts"],
-          dest: "bin"
+          dest: "dist",
+          "rootDir": "./src"
         }],
         options: grunt.file.readJSON('tsconfig.json')
       }

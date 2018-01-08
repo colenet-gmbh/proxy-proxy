@@ -2,13 +2,19 @@
   "name": "proxy-proxy",
   "version": "0.0.1",
   "description": "Proxy \"mock\" to test NTLM authorization ",
-  "main": "server.js",
+  "main": "index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "compile": "grunt",
     "watch": "grunt watch",
-    "start-dev": "npm run compile && concurrently --kill-others \"npm run watch\" \"nodemon bin/server.js\"",
+    "start-dev": "npm run compile && concurrently --kill-others \"npm run watch\" \"nodemon dist/server.js\"",
     "test": "jasmine-ts \"spec/**/*.spec.ts\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com:colenet-gmbh/proxy-proxy.git"
+  },
+  "homepage": "https://github.com/colenet-gmbh/proxy-proxy.git#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/jasmine": "^2.8.3",
@@ -25,5 +31,5 @@
     "typescript": "^2.6.2"
   },
   "author": "Ralf Waldvogel (Colenet GmbH)",
-  "license": "ISC"
+  "license": "MIT"
 }
