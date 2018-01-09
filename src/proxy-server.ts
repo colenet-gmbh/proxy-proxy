@@ -47,7 +47,7 @@ class State {
             return res;
         }
 
-        if (headers['proxy-authenticate'] === undefined) {
+        if (headers['proxy-authorization'] === undefined) {
             this.internalState = AuthenticationState.noAuthentication;
             console.info('no proxy-authenticate');
             let resp = authenticationRequiredResponse();

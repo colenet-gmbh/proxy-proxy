@@ -56,7 +56,7 @@ describe( 'Proxy', () => {
         msg.setHttpMethod('CONNECT');
         msg.setHttpMethodParam('http://example.com');
         msg.addHeader('proxy-Connection', 'keep-alive');
-        msg.addHeader('Proxy-Authenticate', 'NTLM myhas');
+        msg.addHeader('Proxy-Authorization', 'NTLM myhas');
         const buffer = msg.createMessage();
         console.info(buffer);
         socket.write(buffer);
@@ -82,7 +82,7 @@ describe( 'Proxy', () => {
                 msg.setHttpMethod('CONNECT');
                 msg.setHttpMethodParam('http://example.com');
                 msg.addHeader('proxy-Connection', 'keep-alive');
-                msg.addHeader('Proxy-Authenticate', 'NTLM 2ndroundhash');
+                msg.addHeader('Proxy-Authorization', 'NTLM 2ndroundhash');
                 const buffer = msg.createMessage();
                 socket.write(buffer, () => {
                     round = 2;
@@ -104,7 +104,7 @@ describe( 'Proxy', () => {
         msg.setHttpMethod('CONNECT');
         msg.setHttpMethodParam('http://example.com');
         msg.addHeader('proxy-Connection', 'keep-alive');
-        msg.addHeader('Proxy-Authenticate', 'NTLM 1stroundhash');
+        msg.addHeader('Proxy-Authorization', 'NTLM 1stroundhash');
         msg.addHeader('Content-Length', '0');
         const buffer = msg.createMessage();
         socket.write(buffer);
